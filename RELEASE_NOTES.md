@@ -1,14 +1,18 @@
-## AutoLayers v1.0-beta.3
+## AutoLayers v1.0-beta.4
 
 Built by evild - Fork of AutoLayer with bug fixes for TBC Anniversary
 
-### What's New in beta.3
+### What's New in beta.4
 
-- **Fixed layer numbering** - When NovaWorldBuffs is installed, layer numbers now match what everyone else sees
-- Added `getZoneUID()` and `isUsingNWB()` functions for debugging
-- Clear warning messages when using native detection (numbers won't match others without NWB)
+- **Consistent layer numbering** - Layers are now numbered by zoneUID (lowest zoneUID = Layer 1, next = Layer 2, etc.)
+- **This matches how other players number layers** - all players who have seen the same layers will use the same numbering
+- **Persisted layer data** - Detected layers are saved between sessions, so numbering stays consistent across logins
+- No longer requires NovaWorldBuffs for consistent layer numbers!
 
 ### Previous Changes
+
+**beta.3:**
+- Fixed layer numbering to use NWB's data when available
 
 **beta.2:**
 - Native layer detection - Detects layers automatically when you target any NPC
@@ -22,12 +26,14 @@ Built by evild - Fork of AutoLayer with bug fixes for TBC Anniversary
 - Fixed TOC for TBC Anniversary (uses _TBC.toc suffix with Interface 20505)
 - Added first-launch welcome message
 
-### Important Note on Layer Numbers
+### How Layer Numbering Works
 
-- **With NovaWorldBuffs installed**: Layer numbers match other players
-- **Without NWB (native mode)**: Layer numbers are sequential (1, 2, 3...) and **won't match** other players
+Every server layer has a unique "zoneUID" that appears in NPC GUIDs. We sort all known zoneUIDs numerically:
+- Lowest zoneUID → Layer 1
+- Second lowest → Layer 2
+- etc.
 
-For consistent layer numbers with other players, install NovaWorldBuffs.
+This creates consistency across all players. As you discover more layers, numbering may shift, but once everyone has seen the same layers, all numbers match.
 
 ### Installation
 
