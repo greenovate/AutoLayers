@@ -205,3 +205,6 @@ end
 	UpdateLayerText()
 
 	frame:AddChild(layer)
+
+	frame:AddChild(send)
+end
