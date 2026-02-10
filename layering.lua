@@ -10,6 +10,51 @@ local playersInvitedRecently = {}
 local pendingPlayerInvites = {}
 local recentLayerRequests = {}
 local kicked_player_queue = {}
+-- Native layer detection system
+local detectedLayers = {} -- Maps zoneUID -> layer number
+local currentZoneUID = nil
+local nativeCurrentLayer = 0
+
+-- Extract layer info from NPC GUID
+-- Format: Creature-0-[serverID]-[instanceID]-[zoneUID]-[npcID]-[spawnUID]
+local function GetZoneUIDFromGUID(guid)
+	if not guid then return nil end
+	local guidType = strsplit("-", guid)
+	if guidType ~= "Creature" and guidType ~= "Vehicle" then return nil end
+	
+	local parts = {strsplit("-", guid)}
+	if #parts >= 5 then
+		return parts[5] -- zoneUID is the 5th component
+	end
+	return nil
+end
+
+-- Update layer detection when targeting an NPC
+local function OnTargetChanged()
+	local guid = UnitGUID("target")
+	if not guid then return end
+	
+	local zoneUID = GetZoneUIDFromGUID(guid)
+	if not zoneUID then return end
+	
+	currentZoneUID = zoneUID
+	
+	-- If we haven't seen this zoneUID before, assign it a new layer number
+	if not detectedLayers[zoneUID] then
+		local layerCount = 0
+		for _ in pairs(detectedLayers) do
+			layerCount = layerCount + 1
+		end
+		detectedLayers[zoneUID] = layerCount + 1
+	end
+	
+	nativeCurrentLayer = detectedLayers[zoneUID]
+end
+
+-- Create frame to listen for target changes
+local layerDetectionFrame = CreateFrame("Frame")
+layerDetectionFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+layerDetectionFrame:SetScript("OnEvent", OnTargetChanged)
 
 -- Dynamic channel name system with date-based hashing
 local failedChannels = {} -- Track channels that failed to join (no retries)
@@ -252,14 +297,35 @@ end
 --- Finds the current layer from NovaWorldBuffs
 --- @return number? layer The current layer number, or nil if the layer is unknown.
 function AutoLayers:getCurrentLayer()
-	if addonTable.NWB == nil then
-		return
-	end -- No NWB, nothing to do here
-
-	if NWB_CurrentLayer == nil or tonumber(NWB_CurrentLayer) == nil or NWB_CurrentLayer <= 0 then
-		return 0
+	-- First try NWB if available
+	if addonTable.NWB and NWB_CurrentLayer and tonumber(NWB_CurrentLayer) and NWB_CurrentLayer > 0 then
+		return tonumber(NWB_CurrentLayer)
 	end
-	return tonumber(NWB_CurrentLayer)
+	
+	-- Fall back to native detection
+	if nativeCurrentLayer and nativeCurrentLayer > 0 then
+		return nativeCurrentLayer
+	end
+	
+	return 0
+end
+
+function AutoLayers:getLayerCount()
+	-- Prefer NWB if available
+	if addonTable.NWB and addonTable.NWB.data and addonTable.NWB.data.layers then
+		local count = 0
+		for _ in pairs(addonTable.NWB.data.layers) do
+			count = count + 1
+		end
+		return count
+	end
+	
+	-- Fall back to detected layers count, minimum 20
+	local count = 0
+	for _ in pairs(detectedLayers) do
+		count = count + 1
+	end
+	return math.max(count, 20)
 end
 
 -- Autoexec?
