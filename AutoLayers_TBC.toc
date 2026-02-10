@@ -2,7 +2,7 @@
 ## Title: AutoLayers
 ## Notes: A fork of AutoLayer with bug fixes for TBC Anniversary. Automatically invites people that want to layer switch.
 ## Author: evild (fork of raizo's AutoLayer)
-## Version: 1.0-beta.2
+## Version: 1.0-beta.3
 ## SavedVariables: AutoLayersDB
 
 embeds.xml
