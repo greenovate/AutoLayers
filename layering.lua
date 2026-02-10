@@ -1,6 +1,11 @@
 local addonName, addonTable = ...
 local CTL = _G.ChatThrottleLib
 
+
+-- Initialize queues (may also be set in hopping.lua, ensure they exist)
+addonTable.send_queue = addonTable.send_queue or {}
+addonTable.receive_queue = addonTable.receive_queue or {}
+
 local playersInvitedRecently = {}
 local pendingPlayerInvites = {}
 local recentLayerRequests = {}
