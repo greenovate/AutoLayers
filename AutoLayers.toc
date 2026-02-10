@@ -1,0 +1,12 @@
+## Interface: 20505
+## Title: AutoLayers
+## Notes: A fork of AutoLayer with bug fixes for TBC Anniversary. Automatically invites people that want to layer switch.
+## Author: evild (fork of raizo's AutoLayer)
+## Version: 1.0-beta
+## SavedVariables: AutoLayersDB
+
+embeds.xml
+main.lua
+configuration.lua
+layering.lua
+hopping.lua

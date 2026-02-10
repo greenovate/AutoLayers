@@ -26,7 +26,7 @@ local function GenerateLayerChannels()
 	-- Need LibDeflate for hashing
 	local LibDeflate = addonTable.LibDeflate or LibStub and LibStub("LibDeflate")
 	if not LibDeflate then
-		AutoLayer:Print("Error: LibDeflate not found, using fallback channel names")
+		AutoLayers:Print("Error: LibDeflate not found, using fallback channel names")
 		return {"layer", "layer2", "layer3"}
 	end
 
@@ -56,20 +56,20 @@ local function CleanupOldLayerChannels()
 		validChannels[channelName] = true
 	end
 
-	AutoLayer:DebugPrint("CleanupOldLayerChannels: Checking for old channels to leave...")
+	AutoLayers:DebugPrint("CleanupOldLayerChannels: Checking for old channels to leave...")
 
 	-- Check all joined channels and leave old layer_* ones
 	for i = 1, MAX_WOW_CHAT_CHANNELS or 20 do
 		local _, channelName = GetChannelName(i)
 		if channelName then
-			AutoLayer:DebugPrint("  Found channel: " .. channelName)
+			AutoLayers:DebugPrint("  Found channel: " .. channelName)
 		end
 		if channelName and string.match(channelName, "^layer%x%x%x%x%x%x%x%x$") then
 			if not validChannels[channelName] then
-				AutoLayer:DebugPrint("  LEAVING old layer channel: " .. channelName)
+				AutoLayers:DebugPrint("  LEAVING old layer channel: " .. channelName)
 				LeaveChannelByName(channelName)
 			else
-				AutoLayer:DebugPrint("  KEEPING valid layer channel: " .. channelName)
+				AutoLayers:DebugPrint("  KEEPING valid layer channel: " .. channelName)
 			end
 		end
 	end
@@ -97,7 +97,7 @@ local function formatWhisperMessage(template, currentLayer)
 	return template
 end
 
-function AutoLayer:pruneCache()
+function AutoLayers:pruneCache()
 	for i, cachedPlayer in ipairs(playersInvitedRecently) do
 		-- delete players that are over 5 minutes old
 		if cachedPlayer.time + 300 < time() then
@@ -235,7 +235,7 @@ local function parseLayers(message)
 	return uniqueLayers
 end
 
-function AutoLayer:addNWBToAddonTable()
+function AutoLayers:addNWBToAddonTable()
 	for name in LibStub("AceAddon-3.0"):IterateAddons() do
 		if name == "NovaWorldBuffs" then
 			addonTable.NWB = LibStub("AceAddon-3.0"):GetAddon("NovaWorldBuffs")
@@ -246,7 +246,7 @@ end
 
 --- Finds the current layer from NovaWorldBuffs
 --- @return number? layer The current layer number, or nil if the layer is unknown.
-function AutoLayer:getCurrentLayer()
+function AutoLayers:getCurrentLayer()
 	if addonTable.NWB == nil then
 		return
 	end -- No NWB, nothing to do here
@@ -259,9 +259,9 @@ end
 
 -- Autoexec?
 C_Timer.After(0.1, function()
-	AutoLayer:addNWBToAddonTable()
+	AutoLayers:addNWBToAddonTable()
 	if addonTable.NWB == nil then
-		AutoLayer:Print("Could not find NovaWorldBuffs, disabling NovaWorldBuffs integration")
+		AutoLayers:Print("Could not find NovaWorldBuffs, disabling NovaWorldBuffs integration")
 	end
 
 	-- Generate dynamic channel names now that LibDeflate is loaded
@@ -271,26 +271,38 @@ C_Timer.After(0.1, function()
 	end
 
 	-- Debug: Show generated channel names
-	AutoLayer:DebugPrint("Dynamic layer channels for today:")
+	AutoLayers:DebugPrint("Dynamic layer channels for today:")
 	for i, channelName in ipairs(LAYER_CHANNELS) do
-		AutoLayer:DebugPrint("  " .. i .. ": " .. channelName)
+		AutoLayers:DebugPrint("  " .. i .. ": " .. channelName)
 	end
 	-- Cleanup old layer channels from previous days
 	CleanupOldLayerChannels()
 end)
 
-function AutoLayer:FindOfflineMembersToKick()
-	for i = 1, GetNumGroupMembers() do
-		local name, _, _, _, _, _, _, online, _, _, _, _ = GetRaidRosterInfo(i)
-
-		if online == false then
-			table.insert(kicked_player_queue, name)
+function AutoLayers:FindOfflineMembersToKick()
+	if IsInRaid() then
+		for i = 1, GetNumGroupMembers() do
+			local name, _, _, _, _, _, _, online, _, _, _, _ = GetRaidRosterInfo(i)
+			if online == false then
+				table.insert(kicked_player_queue, name)
+			end
+		end
+	else
+		-- In a party, check party members using unit IDs
+		for i = 1, GetNumGroupMembers() - 1 do
+			local unitId = "party" .. i
+			if UnitExists(unitId) and not UnitIsConnected(unitId) then
+				local name = UnitName(unitId)
+				if name then
+					table.insert(kicked_player_queue, name)
+				end
+			end
 		end
 	end
 end
 
 ---@diagnostic disable-next-line:inject-field
-function AutoLayer:ProcessMessage(
+function AutoLayers:ProcessMessage(
 	event,
 	msg,
 	name,
@@ -315,12 +327,12 @@ function AutoLayer:ProcessMessage(
 		return
 	end
 
-	local triggerMatch = containsAnyTriggersFromList(msg, AutoLayer:ParseTriggers())
+	local triggerMatch = containsAnyTriggersFromList(msg, AutoLayers:ParseTriggers())
 	if not triggerMatch then
 		return
 	end
 
-	local blacklistMatch = containsAnyWordFromList(msg, AutoLayer:ParseBlacklist(), false)
+	local blacklistMatch = containsAnyWordFromList(msg, AutoLayers:ParseBlacklist(), false)
 	if blacklistMatch then
 		self:DebugPrint(
 			"Matched blacklist: '",
@@ -335,7 +347,7 @@ function AutoLayer:ProcessMessage(
 	end
 
 	if self.db.profile.channelFiltering == "inclusive" then
-		local inclusiveChannelMatch = containsAnyChannelFromList(channelBaseName, AutoLayer:ParseFilteredChannels())
+		local inclusiveChannelMatch = containsAnyChannelFromList(channelBaseName, AutoLayers:ParseFilteredChannels())
 		if not inclusiveChannelMatch then
 			self:DebugPrint(
 				"Did not match an included channel. Request came from player: '",
@@ -343,13 +355,13 @@ function AutoLayer:ProcessMessage(
 				"' in channel: '",
 				channelBaseName,
 				"' but currenty only allowing these channels: '",
-				AutoLayer:GetFilteredChannels(),
+				AutoLayers:GetFilteredChannels(),
 				"'"
 			)
 			return
 		end
 	elseif self.db.profile.channelFiltering == "exclusive" then
-		local exclusiveChannelMatch = containsAnyChannelFromList(channelBaseName, AutoLayer:ParseFilteredChannels())
+		local exclusiveChannelMatch = containsAnyChannelFromList(channelBaseName, AutoLayers:ParseFilteredChannels())
 		if exclusiveChannelMatch then
 			self:DebugPrint(
 				"Matched excluded request from player: '",
@@ -357,7 +369,7 @@ function AutoLayer:ProcessMessage(
 				"' in excluded channel: '",
 				exclusiveChannelMatch,
 				"' from list of excluded channels: '",
-				AutoLayer:GetFilteredChannels(),
+				AutoLayers:GetFilteredChannels(),
 				"'"
 			)
 			return
@@ -382,7 +394,7 @@ function AutoLayer:ProcessMessage(
 		return
 	end
 
-	local currentLayer = AutoLayer:getCurrentLayer()
+	local currentLayer = AutoLayers:getCurrentLayer()
 	local isHighPriorityRequest = (event == "CHAT_MSG_WHISPER")
 
 	if string.find(msg, "%d+") then -- Uh oh, this player is picky and wants a specific layer!
@@ -399,7 +411,7 @@ function AutoLayer:ProcessMessage(
 			return
 		end
 
-		local requestIsInverted = containsAnyWordFromList(msg, AutoLayer:ParseInvertKeywords(), false)
+		local requestIsInverted = containsAnyWordFromList(msg, AutoLayers:ParseInvertKeywords(), false)
 		local currLayerMatchesRequest = isNumberInList(currentLayer, requestedLayers)
 
 		if requestIsInverted then
@@ -419,7 +431,7 @@ function AutoLayer:ProcessMessage(
 
 	-- check if we've already invited this player in the last 5 minutes
 	if not isHighPriorityRequest then
-		AutoLayer:pruneCache()
+		AutoLayers:pruneCache()
 		for _, cachedPlayer in ipairs(playersInvitedRecently) do
 			if cachedPlayer.name == name_without_realm and cachedPlayer.time + 300 > time() then
 				self:DebugPrint("Already invited", name, "in the last 5 minutes")
@@ -473,16 +485,27 @@ function AutoLayer:ProcessMessage(
 	if self.db.profile.autokick and GetNumGroupMembers() == max_group_size then
 		self:DebugPrint("Group is full, kicking")
 
-		-- kick last member of raid
-		local lastMember = GetRaidRosterInfo(GetNumGroupMembers())
-		table.insert(kicked_player_queue, lastMember)
+		-- kick last member of group
+		local lastMember
+		if IsInRaid() then
+			lastMember = GetRaidRosterInfo(GetNumGroupMembers())
+		else
+			-- In a party, get the last party member
+			local partyIndex = GetNumGroupMembers() - 1
+			if partyIndex > 0 then
+				lastMember = UnitName("party" .. partyIndex)
+			end
+		end
+		if lastMember then
+			table.insert(kicked_player_queue, lastMember)
+		end
 
 		return
 	end
 end
 
 ---@diagnostic disable-next-line: inject-field
-function AutoLayer:ProcessSystemMessages(_, SystemMessages)
+function AutoLayers:ProcessSystemMessages(_, SystemMessages)
 	if not self.db.profile.enabled then
 		return
 	end
@@ -492,7 +515,7 @@ function AutoLayer:ProcessSystemMessages(_, SystemMessages)
 	if characterName then
 		local playerNameWithoutRealm = removeRealmName(characterName)
 		self:DebugPrint("ERR_JOINED_GROUP_S", playerNameWithoutRealm, "found !")
-		-- Do AutoLayer stuff only if they actually asked for a layer
+		-- Do AutoLayers stuff only if they actually asked for a layer
 		-- (this may be a normal player we're inviting for different reasons)
 		for i, entry in ipairs(recentLayerRequests) do
 			if entry.name == playerNameWithoutRealm then
@@ -563,7 +586,7 @@ function AutoLayer:ProcessSystemMessages(_, SystemMessages)
 		end)
 
 		if self.db.profile.inviteWhisper then
-			local currentLayer = AutoLayer:getCurrentLayer()
+			local currentLayer = AutoLayers:getCurrentLayer()
 
 			-- I guess don't whisper people if we don't know what layer we're in?
 			if currentLayer == nil or currentLayer <= 0 then
@@ -587,19 +610,19 @@ function AutoLayer:ProcessSystemMessages(_, SystemMessages)
 
 			-- Continue with the rest of the function if the player is in the list
 
-			local finalMessage = "[AutoLayer] "
+			local finalMessage = "[AutoLayers] "
 				.. formatWhisperMessage(self.db.profile.inviteWhisperTemplate, currentLayer)
 			CTL:SendChatMessage("NORMAL", characterName, finalMessage, "WHISPER", nil, characterName)
 		end
 
 		if self.db.profile.inviteWhisperReminder then
-			local finalMessage2 = "[AutoLayer] " .. string.format(self.db.profile.inviteWhisperTemplateReminder)
+			local finalMessage2 = "[AutoLayers] " .. string.format(self.db.profile.inviteWhisperTemplateReminder)
 			CTL:SendChatMessage("NORMAL", characterName, finalMessage2, "WHISPER", nil, characterName)
 		end
 	end
 end
 
-function AutoLayer:HandleAutoKick()
+function AutoLayers:HandleAutoKick()
 	if not self.db.profile.enabled then
 		return
 	end
@@ -620,15 +643,15 @@ function AutoLayer:HandleAutoKick()
 	end
 end
 
-function AutoLayer:ProcessRosterUpdate()
+function AutoLayers:ProcessRosterUpdate()
 	self:getCurrentLayer()
 end
 
-AutoLayer:RegisterEvent("CHAT_MSG_CHANNEL", "ProcessMessage")
-AutoLayer:RegisterEvent("CHAT_MSG_WHISPER", "ProcessMessage")
-AutoLayer:RegisterEvent("CHAT_MSG_GUILD", "ProcessMessage")
-AutoLayer:RegisterEvent("CHAT_MSG_SYSTEM", "ProcessSystemMessages")
-AutoLayer:RegisterEvent("GROUP_ROSTER_UPDATE", "ProcessRosterUpdate")
+AutoLayers:RegisterEvent("CHAT_MSG_CHANNEL", "ProcessMessage")
+AutoLayers:RegisterEvent("CHAT_MSG_WHISPER", "ProcessMessage")
+AutoLayers:RegisterEvent("CHAT_MSG_GUILD", "ProcessMessage")
+AutoLayers:RegisterEvent("CHAT_MSG_SYSTEM", "ProcessSystemMessages")
+AutoLayers:RegisterEvent("GROUP_ROSTER_UPDATE", "ProcessRosterUpdate")
 
 function JoinLayerChannel()
 	-- Join ALL channels to prevent griefing (so griefers can't become admin in empty channels)
@@ -639,11 +662,11 @@ function JoinLayerChannel()
 		if not failedChannels[channelName] then
 			local channel_num = GetChannelName(channelName)
 			if channel_num == 0 then
-				AutoLayer:DebugPrint("Attempting to join '" .. channelName .. "'")
+				AutoLayers:DebugPrint("Attempting to join '" .. channelName .. "'")
 				JoinChannelByName(channelName)
 			end
 		else
-			AutoLayer:DebugPrint("Channel '" .. channelName .. "' skipped (previously failed to join)")
+			AutoLayers:DebugPrint("Channel '" .. channelName .. "' skipped (previously failed to join)")
 		end
 	end
 
@@ -654,7 +677,7 @@ function JoinLayerChannel()
 			local channel_num = GetChannelName(channelName)
 			if channel_num == 0 and not failedChannels[channelName] then
 				failedChannels[channelName] = true
-				AutoLayer:DebugPrint("Channel '" .. channelName .. "' marked as failed (could not join)")
+				AutoLayers:DebugPrint("Channel '" .. channelName .. "' marked as failed (could not join)")
 			end
 		end
 
@@ -665,7 +688,7 @@ function JoinLayerChannel()
 			if channel_num > 0 then
 				if not addonTable.activeLayerChannel then
 					addonTable.activeLayerChannel = channelName
-					AutoLayer:DebugPrint("Active layer channel set to: " .. channelName)
+					AutoLayers:DebugPrint("Active layer channel set to: " .. channelName)
 				end
 			end
 		end
@@ -673,9 +696,9 @@ function JoinLayerChannel()
 		-- Inform user if we had to use a fallback (first channel in list is primary)
 		local primaryChannel = LAYER_CHANNELS[1]
 		if addonTable.activeLayerChannel and addonTable.activeLayerChannel ~= primaryChannel then
-			AutoLayer:Print("Primary channel unavailable, using fallback: " .. addonTable.activeLayerChannel)
+			AutoLayers:Print("Primary channel unavailable, using fallback: " .. addonTable.activeLayerChannel)
 		elseif not addonTable.activeLayerChannel then
-			AutoLayer:Print("All layer channels unavailable")
+			AutoLayers:Print("All layer channels unavailable")
 		end
 
 		-- Remove all layer channels from chat frames (so they don't clutter the chat)
@@ -690,7 +713,7 @@ function JoinLayerChannel()
 end
 
 function ProccessQueue()
-	AutoLayer:HandleAutoKick()
+	AutoLayers:HandleAutoKick()
 	if #addonTable.send_queue > 0 then
 		local payload = table.remove(addonTable.send_queue, 1)
 		local sentToAny = false
@@ -700,7 +723,7 @@ function ProccessQueue()
 			local channel_num = GetChannelName(channelName)
 			if channel_num > 0 then
 				CTL:SendChatMessage("BULK", channelName, payload, "CHANNEL", nil, channel_num)
-				AutoLayer:DebugPrint("Sent message to channel: " .. channelName)
+				AutoLayers:DebugPrint("Sent message to channel: " .. channelName)
 				sentToAny = true
 			end
 		end
@@ -724,7 +747,7 @@ C_Timer.After(1, function()
 			return
 		end
 
-		AutoLayer:HandleAutoKick()
+		AutoLayers:HandleAutoKick()
 		ProccessQueue()
 	end)
 end)

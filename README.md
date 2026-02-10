@@ -1,6 +1,9 @@
-# AutoLayer - WoW Layering Community Addon
+# AutoLayers - WoW Layering Community Addon
 
-AutoLayer is a **community-driven addon** for World of Warcraft designed to facilitate seamless layer switching. It automates the process of inviting players requesting layer changes via chat. The more people use AutoLayer, the easier it becomes for everyone to switch layers!
+> **Built by evild** | Fork of [AutoLayer](https://github.com/raizo-lord/AutoLayer) with bug fixes for TBC Anniversary  
+> The original AutoLayer was too slow to update, so this fork includes critical fixes to make it work with recent game changes.
+
+AutoLayers is a **community-driven addon** for World of Warcraft designed to facilitate seamless layer switching. It automates the process of inviting players requesting layer changes via chat. The more people use AutoLayers, the easier it becomes for everyone to switch layers!
 
 ## Features
 
@@ -27,5 +30,5 @@ AutoLayer is a **community-driven addon** for World of Warcraft designed to faci
 - **Auto-Kick**: (Manual interaction required) Automatically remove the last group member when the group is full.
 
 
-## Why Use AutoLayer?
-AutoLayer thrives on community participation! The more players who use it, the better it becomes at facilitating layer changes for everyone.
+## Why Use AutoLayers?
+AutoLayers thrives on community participation! The more players who use it, the better it becomes at facilitating layer changes for everyone.

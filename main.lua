@@ -2,7 +2,7 @@
 
 local addonName, addonTable = ...
 
-AutoLayer = LibStub("AceAddon-3.0"):NewAddon("AutoLayer", "AceConsole-3.0", "AceEvent-3.0")
+AutoLayers = LibStub("AceAddon-3.0"):NewAddon("AutoLayers", "AceConsole-3.0", "AceEvent-3.0")
 AceGUI = LibStub("AceGUI-3.0")
 local minimap_icon = LibStub("LibDBIcon-1.0")
 
@@ -24,8 +24,8 @@ local function checkTemplateLength(template)
 end
 
 local options = {
-	name = "AutoLayer",
-	handler = AutoLayer,
+	name = "AutoLayers",
+	handler = AutoLayers,
 	type = "group",
 	args = {
 		generalSettings = {
@@ -37,7 +37,7 @@ local options = {
 				enabled = {
 					type = "toggle",
 					name = "Enabled",
-					desc = "Enable or disable AutoLayer.",
+					desc = "Enable or disable AutoLayers.",
 					set = "SetEnabled",
 					get = "GetEnabled",
 					order = 1,
@@ -55,15 +55,15 @@ local options = {
 					name = "Hide Minimap Icon",
 					desc = "Show or hide the minimap icon.",
 					set = function(info, val)
-						AutoLayer.db.profile.minimap.hide = val
+						AutoLayers.db.profile.minimap.hide = val
 						if val then
-							minimap_icon:Hide("AutoLayer")
+							minimap_icon:Hide("AutoLayers")
 						else
-							minimap_icon:Show("AutoLayer")
+							minimap_icon:Show("AutoLayers")
 						end
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.minimap.hide
+						return AutoLayers.db.profile.minimap.hide
 					end,
 					order = 3,
 				},
@@ -72,10 +72,10 @@ local options = {
 					name = "Guild Only",
 					desc = "Only invite players from your guild.",
 					set = function(info, val)
-						AutoLayer.db.profile.guildOnly = val
+						AutoLayers.db.profile.guildOnly = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.guildOnly
+						return AutoLayers.db.profile.guildOnly
 					end,
 					order = 4,
 				},
@@ -123,10 +123,10 @@ local options = {
 						["exclusive"] = "Trigger all channels except",
 					},
 					set = function(info, val)
-						AutoLayer.db.profile.channelFiltering = val
+						AutoLayers.db.profile.channelFiltering = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.channelFiltering
+						return AutoLayers.db.profile.channelFiltering
 					end,
 					order = 4,
 				},
@@ -137,15 +137,15 @@ local options = {
 					desc = "Comma-separated channel names for filtering. * can be used as a wildcard",
 					set = function(info, val)
 						if val == "" then
-							AutoLayer.db.profile.channelFiltering = "none"
+							AutoLayers.db.profile.channelFiltering = "none"
 						end
-						AutoLayer.db.profile.filteredChannels = val
+						AutoLayers.db.profile.filteredChannels = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.filteredChannels
+						return AutoLayers.db.profile.filteredChannels
 					end,
 					disabled = function()
-						return AutoLayer.db.profile.channelFiltering == "none"
+						return AutoLayers.db.profile.channelFiltering == "none"
 					end,
 					order = 5,
 				},
@@ -154,10 +154,10 @@ local options = {
 					name = "Whisper Invites",
 					desc = "Send a whisper to players when inviting them.",
 					set = function(info, val)
-						AutoLayer.db.profile.inviteWhisper = val
+						AutoLayers.db.profile.inviteWhisper = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.inviteWhisper
+						return AutoLayers.db.profile.inviteWhisper
 					end,
 					order = 6,
 				},
@@ -167,10 +167,10 @@ local options = {
 					name = "Whisper Template",
 					desc = "Template for invite whispers. Use {layer} for layer number.",
 					set = function(info, val)
-						AutoLayer.db.profile.inviteWhisperTemplate = val
+						AutoLayers.db.profile.inviteWhisperTemplate = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.inviteWhisperTemplate
+						return AutoLayers.db.profile.inviteWhisperTemplate
 					end,
 					validate = function(info, val)
 						return checkTemplateLength(val)
@@ -182,10 +182,10 @@ local options = {
 					name = "Whisper Reminder Text",
 					desc = "Send a reminder text to Leave Party after layer switch.",
 					set = function(info, val)
-						AutoLayer.db.profile.inviteWhisperReminder = val
+						AutoLayers.db.profile.inviteWhisperReminder = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.inviteWhisperReminder
+						return AutoLayers.db.profile.inviteWhisperReminder
 					end,
 					order = 8,
 				},
@@ -195,10 +195,10 @@ local options = {
 					name = "Whisper Template Second Line",
 					desc = "Reminder to Leave Party after layer switch.",
 					set = function(info, val)
-						AutoLayer.db.profile.inviteWhisperTemplateReminder = val
+						AutoLayers.db.profile.inviteWhisperTemplateReminder = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.inviteWhisperTemplateReminder
+						return AutoLayers.db.profile.inviteWhisperTemplateReminder
 					end,
 					validate = function(info, val)
 						return checkTemplateLength(val)
@@ -217,29 +217,29 @@ local options = {
 				mutesounds = {
 					type = "toggle",
 					name = "Mute Sounds",
-					desc = "Mute party-related sounds while AutoLayer is active.",
+					desc = "Mute party-related sounds while AutoLayers is active.",
 					set = function(info, val)
-						AutoLayer.db.profile.mutesounds = val
+						AutoLayers.db.profile.mutesounds = val
 						if val then
-							AutoLayer:MuteAnnoyingSounds()
+							AutoLayers:MuteAnnoyingSounds()
 						else
-							AutoLayer:UnmuteAnnoyingSounds()
+							AutoLayers:UnmuteAnnoyingSounds()
 						end
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.mutesounds
+						return AutoLayers.db.profile.mutesounds
 					end,
 					order = 1,
 				},
 				turnOffWhileRaidAssist = {
 					type = "toggle",
 					name = "Disable in Raid Assist",
-					desc = "Turn off AutoLayer functionality when you are raid assist.",
+					desc = "Turn off AutoLayers functionality when you are raid assist.",
 					set = function(info, val)
-						AutoLayer.db.profile.turnOffWhileRaidAssist = val
+						AutoLayers.db.profile.turnOffWhileRaidAssist = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.turnOffWhileRaidAssist
+						return AutoLayers.db.profile.turnOffWhileRaidAssist
 					end,
 					order = 2,
 				},
@@ -248,27 +248,27 @@ local options = {
 					name = "Auto-Kick on Full",
 					desc = "|cffFF0000Requires manual interaction.|r Kicks the last member if the group is full.",
 					set = function(info, val)
-						AutoLayer.db.profile.autokick = val
+						AutoLayers.db.profile.autokick = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.autokick
+						return AutoLayers.db.profile.autokick
 					end,
 					order = 3,
 				},
 				hideAutoWhispers = {
 					type = "toggle",
 					name = "Hide AddOn Whispers",
-					desc = "Silence auto whispers sent out by AutoLayer",
+					desc = "Silence auto whispers sent out by AutoLayers",
 					set = function(info, val)
-						AutoLayer.db.profile.hideAutoWhispers = val
+						AutoLayers.db.profile.hideAutoWhispers = val
 						if val then
-							AutoLayer:filterChatEventAutoLayerWhisperMessages()
+							AutoLayers:filterChatEventAutoLayersWhisperMessages()
 						else
-							AutoLayer:unfilterChatEventAutoLayerWhisperMessages()
+							AutoLayers:unfilterChatEventAutoLayersWhisperMessages()
 						end
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.hideAutoWhispers
+						return AutoLayers.db.profile.hideAutoWhispers
 					end,
 					order = 4,
 				},
@@ -277,15 +277,15 @@ local options = {
 					name = "Hide Group Notices",
 					desc = 'Silence system group notices eg. "X has left the party"',
 					set = function(info, val)
-						AutoLayer.db.profile.hideSystemGroupMessages = val
+						AutoLayers.db.profile.hideSystemGroupMessages = val
 						if val then
-							AutoLayer:filterChatEventSystemGroupMessages()
+							AutoLayers:filterChatEventSystemGroupMessages()
 						else
-							AutoLayer:unfilterChatEventSystemGroupMessages()
+							AutoLayers:unfilterChatEventSystemGroupMessages()
 						end
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.hideSystemGroupMessages
+						return AutoLayers.db.profile.hideSystemGroupMessages
 					end,
 					order = 5,
 				},
@@ -302,10 +302,10 @@ local options = {
 					name = "Override Loot Settings",
 					desc = "Automatically set desired loot method and threshold when new players join the party.",
 					set = function(info, val)
-						AutoLayer.db.profile.overrideLootSettings = val
+						AutoLayers.db.profile.overrideLootSettings = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.overrideLootSettings
+						return AutoLayers.db.profile.overrideLootSettings
 					end,
 					order = 1,
 				},
@@ -320,10 +320,10 @@ local options = {
 						[4] = "Need Before Greed",
 					},
 					set = function(info, val)
-						AutoLayer.db.profile.lootMethod = val
+						AutoLayers.db.profile.lootMethod = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.lootMethod
+						return AutoLayers.db.profile.lootMethod
 					end,
 					order = 2,
 				},
@@ -337,10 +337,10 @@ local options = {
 						[4] = "|cffA335EEEpic|r",
 					},
 					set = function(info, val)
-						AutoLayer.db.profile.lootThreshold = val
+						AutoLayers.db.profile.lootThreshold = val
 					end,
 					get = function(info)
-						return AutoLayer.db.profile.lootThreshold
+						return AutoLayers.db.profile.lootThreshold
 					end,
 					order = 3,
 				},
@@ -374,6 +374,7 @@ local defaults = {
 		},
 		autokick = false,
 		turnOffWhileRaidAssist = true,
+		firstLaunchSeen = false,
 	},
 }
 
@@ -453,31 +454,47 @@ local function matchesAnySystemMessage(msg)
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function AutoLayer:OnInitialize()
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("AutoLayer", options)
-	self.db = LibStub("AceDB-3.0"):New("AutoLayerDB", defaults)
+function AutoLayers:OnInitialize()
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("AutoLayers", options)
+	self.db = LibStub("AceDB-3.0"):New("AutoLayersDB", defaults)
+	
+	-- First launch message
+	if not self.db.profile.firstLaunchSeen then
+		self.db.profile.firstLaunchSeen = true
+		C_Timer.After(3, function()
+			self:Print("|cff00ff00AutoLayers v1.0-beta|r - You're welcome, -evild")
+			self:Print("Fork of AutoLayer with bug fixes for TBC Anniversary. Type /al to configure.")
+		end)
+	end
 	
 	-- Modern API for adding options
 	local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-	AceConfigDialog:SetDefaultSize("AutoLayer", 600, 500)
+	AceConfigDialog:SetDefaultSize("AutoLayers", 600, 500)
 	
 	-- Register slash commands
 	self:RegisterChatCommand("autolayer", function(input)
 		if input == "" then
-			AceConfigDialog:Open("AutoLayer")
+			AceConfigDialog:Open("AutoLayers")
 		else
-			AutoLayer:SlashCommand(input)
+			AutoLayers:SlashCommand(input)
+		end
+	end)
+	self:RegisterChatCommand("autolayers", function(input)
+		if input == "" then
+			AceConfigDialog:Open("AutoLayers")
+		else
+			AutoLayers:SlashCommand(input)
 		end
 	end)
 	self:RegisterChatCommand("al", function()
-		AceConfigDialog:Open("AutoLayer")
+		AceConfigDialog:Open("AutoLayers")
 	end)
 	local icon = ""
 
 	if self.db.profile.enabled then
-		icon = [[Interface\AddOns\AutoLayer_Vanilla\Textures\AutoLayer_enabled_icon]]
+		icon = [[Interface\AddOns\AutoLayers\Textures\AutoLayers_enabled_icon]]
 	else
-		icon = [[Interface\AddOns\AutoLayer_Vanilla\Textures\AutoLayer_disabled_icon]]
+		icon = [[Interface\AddOns\AutoLayers\Textures\AutoLayers_disabled_icon]]
 	end
 
 	if self.db.profile.mutesounds then
@@ -485,7 +502,7 @@ function AutoLayer:OnInitialize()
 	end
 
 	if self.db.profile.hideAutoWhispers then
-		self.filterChatEventAutoLayerWhisperMessages()
+		self.filterChatEventAutoLayersWhisperMessages()
 	end
 
 	if self.db.profile.hideSystemGroupMessages then
@@ -493,34 +510,34 @@ function AutoLayer:OnInitialize()
 	end
 
 	---@diagnostic disable-next-line: missing-fields
-	local bunnyLDB = LibStub("LibDataBroker-1.1"):NewDataObject("AutoLayer", {
+	local bunnyLDB = LibStub("LibDataBroker-1.1"):NewDataObject("AutoLayers", {
 		type = "data source",
-		text = "AutoLayer",
+		text = "AutoLayers",
 		icon = icon,
 
 		-- listen for right click
 		OnClick = function(self, button)
 			if button == "LeftButton" then
-				AutoLayer:Toggle()
+				AutoLayers:Toggle()
 			end
 
 			if button == "RightButton" then
-				AutoLayer:HopGUI()
+				AutoLayers:HopGUI()
 			end
 		end,
 
 		onMouseUp = function(self, button)
 			print(button)
-			AutoLayer:Toggle()
+			AutoLayers:Toggle()
 		end,
 		OnTooltipShow = function(tooltip)
-			tooltip:AddLine("AutoLayer")
-			tooltip:AddLine("Left-click to toggle AutoLayer")
+			tooltip:AddLine("AutoLayers")
+			tooltip:AddLine("Left-click to toggle AutoLayers")
 			tooltip:AddLine("Right-click to hop layers")
 			tooltip:AddLine("Layered " .. self.db.profile.layered .. " times")
 
 			if addonTable.NWB ~= nil then
-				local currentLayer = AutoLayer:getCurrentLayer()
+				local currentLayer = AutoLayers:getCurrentLayer()
 				if currentLayer == 0 then
 					tooltip:AddLine("Current layer: unknown, target an NPC")
 				else
@@ -534,16 +551,16 @@ function AutoLayer:OnInitialize()
 
 	local frame = CreateFrame("Frame", "MuteSoundFrame")
 	frame.MuteSoundFile = MuteSoundFile
-	minimap_icon:Register("AutoLayer", bunnyLDB, self.db.profile.minimap)
+	minimap_icon:Register("AutoLayers", bunnyLDB, self.db.profile.minimap)
 end
 
-function AutoLayer:MuteAnnoyingSounds()
+function AutoLayers:MuteAnnoyingSounds()
 	for _, soundFileId in pairs(annoyingSounds) do
 		MuteSoundFile(soundFileId)
 	end
 end
 
-function AutoLayer:UnmuteAnnoyingSounds()
+function AutoLayers:UnmuteAnnoyingSounds()
 	for _, soundFileId in pairs(annoyingSounds) do
 		UnmuteSoundFile(soundFileId)
 	end
@@ -551,47 +568,47 @@ end
 
 --For hiding outgoing automatic whispers
 local function whisperInformFilter(self, event, msg, author, ...)
-	local filtered = string.sub(msg, 1, 11) == "[AutoLayer]"
+	local filtered = string.sub(msg, 1, 11) == "[AutoLayers]"
 	return filtered, msg, author, ...
 end
-function AutoLayer:filterChatEventAutoLayerWhisperMessages()
+function AutoLayers:filterChatEventAutoLayersWhisperMessages()
 	ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", whisperInformFilter)
 end
-function AutoLayer:unfilterChatEventAutoLayerWhisperMessages()
+function AutoLayers:unfilterChatEventAutoLayersWhisperMessages()
 	ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", whisperInformFilter)
 end
 
 --For hiding group system messages
 local function systemFilter(self, event, msg, author, ...)
-	local filtered = AutoLayer:GetEnabled() and matchesAnySystemMessage(msg)
+	local filtered = AutoLayers:GetEnabled() and matchesAnySystemMessage(msg)
 	return filtered, msg, author, ...
 end
-function AutoLayer:filterChatEventSystemGroupMessages()
+function AutoLayers:filterChatEventSystemGroupMessages()
 	ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", systemFilter)
 end
-function AutoLayer:unfilterChatEventSystemGroupMessages()
+function AutoLayers:unfilterChatEventSystemGroupMessages()
 	ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", systemFilter)
 end
 
-function AutoLayer:SlashCommand(input)
+function AutoLayers:SlashCommand(input)
 	local command = self:GetArgs(input, 1)
 
 	if command == "help" then
-		return AutoLayer:SlashCommandHelp()
+		return AutoLayers:SlashCommandHelp()
 	elseif command == "req" then
-		return AutoLayer:SlashCommandRequest(input)
+		return AutoLayers:SlashCommandRequest(input)
 	else
 		return self:Print("Unknown command " .. command .. ". Type /autolayer help for a list of commands.")
 	end
 end
 
-function AutoLayer:SlashCommandHelp()
-	self:Print("AutoLayer Slash Commands:")
-	self:Print("/autolayer or /al - Open the AutoLayer settings GUI.")
+function AutoLayers:SlashCommandHelp()
+	self:Print("AutoLayers Slash Commands:")
+	self:Print("/autolayer or /al - Open the AutoLayers settings GUI.")
 	self:Print("/autolayer req [layers] - Send a layer hop request via chat. '[layers]' is a comma-separated list of layer numbers to request. If omitted, requests all layers except the current one.")
 end
 
-function AutoLayer:DebugPrint(...)
+function AutoLayers:DebugPrint(...)
 	if self.db.profile.debug then
 		self:Print(...)
 	end

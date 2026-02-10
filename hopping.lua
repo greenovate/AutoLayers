@@ -8,16 +8,16 @@ addonTable.receive_queue = {}
 local selected_layers = {}
 local is_closed = true
 
-function AutoLayer:SendLayerRequest()
+function AutoLayers:SendLayerRequest()
 	local res = "inv layer "
 	res = res .. table.concat(selected_layers, ",")
 	LeaveParty()
 	table.insert(addonTable.send_queue, res)
-	AutoLayer:DebugPrint("Sending layer request: " .. res)
+	AutoLayers:DebugPrint("Sending layer request: " .. res)
 	ProccessQueue()
 end
 
-function AutoLayer:SlashCommandRequest(input)
+function AutoLayers:SlashCommandRequest(input)
 	if not is_closed then
 		return self:Print("Hopper GUI is already open. Use either the GUI or slash commands, not both.")
 	end
@@ -49,26 +49,26 @@ function AutoLayer:SlashCommandRequest(input)
 	end
 
 	if #selected_layers > 0 then
-		AutoLayer:SendLayerRequest()
+		AutoLayers:SendLayerRequest()
 	end
 end
 
-function AutoLayer:HopGUI()
+function AutoLayers:HopGUI()
 	if not is_closed then
 		return
 	end
 
 	is_closed = false
 	local frame = AceGUI:Create("Frame")
-	frame:SetTitle("AutoLayer - Hopper")
+	frame:SetTitle("AutoLayers - Hopper")
 	frame:SetWidth(400)
 	frame:SetHeight(250)
 	frame:SetStatusText("Beta feature")
 	frame:SetLayout("Flow")
 
 	-- Register the frame so it closes when pressing ESC
-	_G["AutoLayerHopperFrame"] = frame.frame
-	tinsert(UISpecialFrames, "AutoLayerHopperFrame")
+	_G["AutoLayersHopperFrame"] = frame.frame
+	tinsert(UISpecialFrames, "AutoLayersHopperFrame")
 
 	-- Set a background color and padding
 	frame:SetCallback("OnClose", function()
@@ -81,7 +81,7 @@ function AutoLayer:HopGUI()
 	send:SetText("Send Layer Request")
 	send:SetWidth(160)
 	send:SetCallback("OnClick", function()
-		AutoLayer:SendLayerRequest()
+		AutoLayers:SendLayerRequest()
 	end)
 
 	-- Check if NovaWorldBuffs is installed
