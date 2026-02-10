@@ -1,4 +1,4 @@
-## Interface: 20602
+## Interface: 20505
 ## Title: AutoLayers
 ## Notes: A fork of AutoLayer with bug fixes for TBC Anniversary. Automatically invites people that want to layer switch.
 ## Author: evild (fork of raizo's AutoLayer)
