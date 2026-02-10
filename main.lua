@@ -375,6 +375,7 @@ local defaults = {
 		autokick = false,
 		turnOffWhileRaidAssist = true,
 		firstLaunchSeen = false,
+		detectedZoneUIDs = {}, -- Persistent layer detection data
 	},
 }
 
@@ -458,11 +459,14 @@ function AutoLayers:OnInitialize()
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("AutoLayers", options)
 	self.db = LibStub("AceDB-3.0"):New("AutoLayersDB", defaults)
 	
+	-- Load persisted layer detection data
+	self:LoadPersistedLayers()
+	
 	-- First launch message
 	if not self.db.profile.firstLaunchSeen then
 		self.db.profile.firstLaunchSeen = true
 		C_Timer.After(3, function()
-			self:Print("|cff00ff00AutoLayers v1.0-beta|r - You're welcome, -evild")
+			self:Print("|cff00ff00AutoLayers v1.0-beta.4|r - You're welcome, -evild")
 			self:Print("Fork of AutoLayer with bug fixes for TBC Anniversary. Type /al to configure.")
 		end)
 	end
