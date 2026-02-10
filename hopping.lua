@@ -37,13 +37,13 @@ function AutoLayers:SlashCommandRequest(input)
 			return
 		end
 	else
-		self:DebugPrint("Received slash command request for all layers except current ( layer", NWB_CurrentLayer, ").")
+		local currentLayer = AutoLayers:getCurrentLayer()
+		self:DebugPrint("Received slash command request for all layers except current ( layer", currentLayer, ").")
 
-		local count = 0
-		for _ in pairs(addonTable.NWB.data.layers) do
-			count = count + 1
-			if count ~= NWB_CurrentLayer then
-				table.insert(selected_layers, tostring(count))
+		local layerCount = AutoLayers:getLayerCount()
+		for i = 1, layerCount do
+			if i ~= currentLayer then
+				table.insert(selected_layers, tostring(i))
 			end
 		end
 	end
@@ -84,9 +84,6 @@ function AutoLayers:HopGUI()
 		AutoLayers:SendLayerRequest()
 	end)
 
-	-- Check if NovaWorldBuffs is installed
-	local hasNWB = addonTable.NWB ~= nil and addonTable.NWB.data and addonTable.NWB.data.layers
-	
 	-- Create a header for clarity
 	local header = AceGUI:Create("Label")
 	header:SetText("Select Layers to Hop to:")
@@ -121,14 +118,8 @@ function AutoLayers:HopGUI()
 	layer:SetMultiselect(true)
 	layer:SetWidth(300)
 
-	-- Get layer count - prefer NWB if available, otherwise use 20 layers
-	local layerCount = 20
-	if hasNWB then
-		layerCount = 0
-		for _ in pairs(addonTable.NWB.data.layers) do
-			layerCount = layerCount + 1
-		end
-	end
+	-- Get layer count from AutoLayers
+	local layerCount = AutoLayers:getLayerCount()
 	
 	local layers = {}
 	for i = 1, layerCount do
